@@ -2,7 +2,6 @@ import traceback
 
 from application import Application
 
-
 DEBUG = True
 
 if __name__ == '__main__':

@@ -1,51 +1,50 @@
-import json
+class InvalidDigitSequence(Exception):
+    def __init__(self, digit_sequence):
+        self.digit_sequence = digit_sequence
+
+    def __str__(self):
+        return 'Invalid digit sequence: {}'.format(self.digit_sequence)
+
+    @property
+    def message(self):
+        return str(self)
 
 
 class Decoder(object):
-    BYTE_SIZE = 8
-
-    def __init__(self, input_filename, output_filename, mappings_filename):
-        self.input_filename = input_filename
-        self.output_filename = output_filename
-        self.mappings_filename = mappings_filename
-        self.encoded_content = ''
-        self.decoded_content = ''
-        self.meta_info = None
-        self.mappings = {}
+    def __init__(self, encoded_content, mappings):
+        self.encoded_content = encoded_content
+        self.encoded_digit_sequence = ''
+        self.mappings = mappings
+        self.raw_content = ''
 
     def decode(self):
-        self._read_encoded_content()
-        self._read_mappings()
-        self._replace_with_mappings()
+        self.encoded_digit_sequence = self._get_encoded_digit_sequence()
+        self.raw_content = self._replace_with_mappings()
+        return self.raw_content
 
-    def _read_encoded_content(self):
-        with open(self.input_filename, 'rb') as f:
-            self.meta_info = int.from_bytes(f.read(1), 'big')
-            encoded_content = f.read()
-            temp_list = []
-            try:
-                remainder = encoded_content[0]
-                temp_list.append('{0:0{1}b}'.format(remainder, self.meta_info))
-                for num in encoded_content[1:]:
-                    temp_list.append('{0:08b}'.format(num))
-                self.encoded_content = ''.join(temp_list)
-            except IndexError:
-                pass
-
-    def _read_mappings(self):
-        json_content = open(self.mappings_filename, 'r').read()
-        self.mappings = json.loads(json_content)
+    def _get_encoded_digit_sequence(self):
+        remainder = self.encoded_content[0]
+        encoded_content = self.encoded_content[1:]
+        digit_sequence_list = []
+        try:
+            remainder_chars = encoded_content[0]
+            digit_sequence_list.append('{0:0{1}b}'.format(remainder_chars, remainder))
+            for char in encoded_content[1:]:
+                digit_sequence_list.append('{0:08b}'.format(char))
+        except IndexError:
+            pass
+        return ''.join(digit_sequence_list)
 
     def _replace_with_mappings(self):
-        temp_list = []
+        raw_content_list = []
         code = ''
-        for char in self.encoded_content:
+        for char in self.encoded_digit_sequence:
             code += char
             if code in self.mappings:
-                temp_list.append(self.mappings[code])
+                raw_content_list.append(self.mappings[code])
                 code = ''
-        self.decoded_content = ''.join(temp_list)
-
-    def write_decoded_content(self):
-        with open(self.output_filename, 'w') as f:
-            f.write(self.decoded_content)
+            else:
+                keys_with_same_prefix = [key for key in self.mappings.keys() if key.startswith(code)]
+                if not keys_with_same_prefix:
+                    raise InvalidDigitSequence(code)
+        return ''.join(raw_content_list)

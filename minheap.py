@@ -11,14 +11,14 @@ class HeapElement(object):
     def serialize(self):
         pass
 
-    def generate_mappings(self, dictionary, prefix=''):
+    def generate_mappings(self, dictionary, code=''):
         if self.char:
-            dictionary.update({self.char: prefix})
+            dictionary.update({self.char: code})
         else:
             if self.left:
-                self.left.generate_mappings(dictionary, prefix + '0')
+                self.left.generate_mappings(dictionary, code + '0')
             if self.right:
-                self.right.generate_mappings(dictionary, prefix + '1')
+                self.right.generate_mappings(dictionary, code + '1')
 
     def __lt__(self, other):
         return self.count < other.count
