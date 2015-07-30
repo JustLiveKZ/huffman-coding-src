@@ -40,25 +40,37 @@ class MinHeap(object):
     def __init__(self):
         self.heap = []
 
+    def _get_left_child(self, parent):
+        return parent * 2 + 1
+
+    def _get_right_child(self, parent):
+        return parent * 2 + 2
+
+    def _get_parent(self, child):
+        return (child - 1) // 2
+
+    def _get_min_out_of_three(self, parent):
+        min_index = parent
+        left = self._get_left_child(parent)
+        if self.heap[left] < self.heap[min_index]:
+            min_index = left
+        right = self._get_right_child(parent)
+        if right < len(self.heap) and self.heap[right] < self.heap[min_index]:
+            min_index = right
+        return min_index
+
     def _sift_down(self, index):
-        left = index * 2 + 1
-        while left < len(self.heap):
-            min_index = index
-            if self.heap[left] < self.heap[min_index]:
-                min_index = left
-            right = index * 2 + 2
-            if right < len(self.heap) and self.heap[right] < self.heap[min_index]:
-                min_index = right
+        while self._get_left_child(index) < len(self.heap):
+            min_index = self._get_min_out_of_three(index)
             if min_index != index:
                 self.swap(index, min_index)
                 index = min_index
-                left = index * 2 + 1
             else:
                 break
 
     def _sift_up(self, index):
         while index > 0:
-            parent = (index - 1) // 2
+            parent = self._get_parent(index)
             if self.heap[index] < self.heap[parent]:
                 self.swap(index, parent)
                 index = parent
