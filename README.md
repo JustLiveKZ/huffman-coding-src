@@ -19,4 +19,4 @@ For example if you have your encoded text you want to decode in `encoded.txt` an
 ## Tests
     python3 tests.py
 
-The is actually a single test case which encodes raw text then decodes it back and checks if original text equals to decoded text. But this single test case gives about 90% coverage of code.
+There is actually a single test case which encodes raw text then decodes it back and checks if original text equals to decoded text. But this single test case gives about 90% coverage of code.
